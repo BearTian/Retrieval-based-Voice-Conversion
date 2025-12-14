@@ -52,10 +52,10 @@ class VC:
         weight_root = os.getenv("weight_root")
         person = sid if os.path.exists(sid) else f'{weight_root if weight_root is not None else "."}/{sid}'
         logger.info(f"Loading: {person}")
-        
+
         if not os.path.exists(person) or person.endswith("/"):
             raise FileNotFoundError(f"model file not found (path: {person}).")
-        
+
         self.cpt = torch.load(person, weights_only=False, map_location="cpu")
         self.tgt_sr = self.cpt["config"][-1]
         self.cpt["config"][-3] = self.cpt["weight"]["emb_g.weight"].shape[0]  # n_spk
@@ -107,7 +107,7 @@ class VC:
         resample_sr: int = 0,
         rms_mix_rate: float = 0.25,
         protect: float = 0.33,
-        hubert_path: str | Path | None = None,
+        hubert_path: str = "/home/user/RVC/hubert_base.pt",
     ):
         if hubert_path is None:
             hubert_path = os.getenv("hubert_path")
@@ -115,7 +115,7 @@ class VC:
             hubert_path = hubert_path.name
         elif not isinstance(hubert_path, str):
             raise RuntimeError(f"pathlib.Path, str, or None expected for hubert_path. Got {type(hubert_path)}")
-        
+
         if hubert_path is None or not os.path.exists(hubert_path):
             raise FileNotFoundError("hubert_path not found.")
 
@@ -123,24 +123,24 @@ class VC:
             input_audio_path = input_audio_path.name
         elif not isinstance(input_audio_path, str):
             raise RuntimeError(f"pathlib.Path or str expected for input_audio_path. Got {type(input_audio_path)}")
-        
+
         if not os.path.exists(input_audio_path):
             raise FileNotFoundError("input_audio_path not found.")
-        
+
         if isinstance(f0_file, str):
             f0_file = Path(f0_file)
         elif not isinstance(f0_file, Path) and f0_file is not None:
             raise RuntimeError(f"pathlib.Path, str, or None expected for f0_file. Got {type(f0_file)}")
-        
+
         if hasattr(f0_file, "name") and not os.path.exists(f0_file.name):
             logger.warning("f0_file not found. Will use None instead.")
             f0_file = None
-        
+
         if hasattr(index_file, "name"):
             index_file = index_file.name
         elif not isinstance(index_file, str) and index_file is not None:
             raise RuntimeError(f"pathlib.Path, str, or None expected for index_file. Got {type(index_file)}")
-        
+
         if index_file is not None and not os.path.exists(index_file):
             logger.warning("index_file not found. Will use None instead.")
             index_file = None
